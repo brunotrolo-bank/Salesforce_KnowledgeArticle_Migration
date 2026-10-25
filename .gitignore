@@ -1,0 +1,10 @@
+# Artefatos de execução (pastas de trabalho geradas pela skill)
+01-extraido/
+02-convertido/
+03-pacote/
+manifest.json
+conversion-report.json
+validation-result.json
+
+# Node
+node_modules/
