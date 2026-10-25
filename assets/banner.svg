@@ -1,0 +1,66 @@
+<svg width="960" height="260" viewBox="0 0 960 260" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0B4C8C"/>
+      <stop offset="55%" stop-color="#032D60"/>
+      <stop offset="100%" stop-color="#00132E"/>
+    </linearGradient>
+    <linearGradient id="accent" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#00A1E0"/>
+      <stop offset="100%" stop-color="#22E3C6"/>
+    </linearGradient>
+    <linearGradient id="gold" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#FBBF24"/>
+      <stop offset="100%" stop-color="#F59E0B"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="960" height="260" rx="24" fill="url(#bg)"/>
+
+  <!-- Glifo: documento HTML de origem -> accordion nativo do Salesforce -->
+  <g transform="translate(55,60)">
+    <!-- Documento de origem (Wiki/HTML) -->
+    <rect x="0" y="0" width="70" height="92" rx="8" fill="#04203F" stroke="#7FD3F2" stroke-width="2"/>
+    <line x1="12" y1="20" x2="58" y2="20" stroke="#7FD3F2" stroke-width="3" opacity="0.85"/>
+    <line x1="12" y1="34" x2="58" y2="34" stroke="#7FD3F2" stroke-width="3" opacity="0.6"/>
+    <line x1="12" y1="48" x2="46" y2="48" stroke="#7FD3F2" stroke-width="3" opacity="0.6"/>
+    <line x1="12" y1="66" x2="58" y2="66" stroke="#EF4444" stroke-width="3" opacity="0.8"/>
+    <line x1="12" y1="80" x2="40" y2="80" stroke="#EF4444" stroke-width="3" opacity="0.5"/>
+
+    <!-- Seta de transformação -->
+    <path d="M 84 46 L 118 46" stroke="url(#accent)" stroke-width="4" stroke-linecap="round"/>
+    <path d="M 108 36 L 118 46 L 108 56" stroke="url(#accent)" stroke-width="4" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+
+    <!-- Accordion nativo (painéis empilhados, um aberto com check) -->
+    <g transform="translate(136,0)">
+      <rect x="0" y="0" width="92" height="24" rx="6" fill="#0E3A66" stroke="url(#gold)" stroke-width="2"/>
+      <path d="M 10 12 L 14 16 L 20 8" stroke="url(#gold)" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+      <line x1="30" y1="12" x2="80" y2="12" stroke="#FDE047" stroke-width="2.5" opacity="0.7"/>
+
+      <rect x="0" y="34" width="92" height="58" rx="6" fill="#04203F" stroke="#22E3C6" stroke-width="2"/>
+      <line x1="10" y1="48" x2="78" y2="48" stroke="#BCD5F0" stroke-width="2.5" opacity="0.7"/>
+      <line x1="10" y1="60" x2="78" y2="60" stroke="#BCD5F0" stroke-width="2.5" opacity="0.5"/>
+      <line x1="10" y1="72" x2="60" y2="72" stroke="#BCD5F0" stroke-width="2.5" opacity="0.5"/>
+
+      <rect x="0" y="102" width="92" height="20" rx="6" fill="#0E3A66" stroke="#8AA9D6" stroke-width="1.5" opacity="0.8"/>
+    </g>
+  </g>
+
+  <text x="300" y="112" font-family="'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="38" font-weight="700" fill="#FFFFFF">Salesforce Knowledge Article Migration</text>
+  <text x="302" y="150" font-family="'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="18" fill="#BCD5F0">De HTML de Wiki a accordion nativo — fidelidade validada campo a campo, não só texto corrido.</text>
+
+  <!-- Pills -->
+  <g font-family="'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="15" font-weight="600" fill="#FDE047">
+    <rect x="302" y="174" width="110" height="30" rx="15" fill="#0E3A66" stroke="#8AA9D6" stroke-width="1"/>
+    <text x="357" y="194" text-anchor="middle">3 subagentes</text>
+
+    <rect x="422" y="174" width="170" height="30" rx="15" fill="#0E3A66" stroke="#8AA9D6" stroke-width="1"/>
+    <text x="507" y="194" text-anchor="middle">accordion nativo real</text>
+
+    <rect x="602" y="174" width="190" height="30" rx="15" fill="#0E3A66" stroke="#8AA9D6" stroke-width="1"/>
+    <text x="697" y="194" text-anchor="middle">fidelidade 100% validada</text>
+
+    <rect x="802" y="174" width="110" height="30" rx="15" fill="#0E3A66" stroke="#8AA9D6" stroke-width="1"/>
+    <text x="857" y="194" text-anchor="middle">zero deps</text>
+  </g>
+</svg>
