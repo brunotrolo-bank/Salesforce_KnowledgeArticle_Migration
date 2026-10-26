@@ -34,8 +34,16 @@ desnecessária.
 ## Passo 0 — reconhecimento da tarefa
 
 1. Identifique a **pasta de origem** (contém os `.zip` de artigos) e a
-   **pasta de trabalho** (onde ficam `01-extraido/`, `02-convertido/`,
-   `03-pacote/` — ver `references/run-state.md`). Se o usuário não tiver uma
+   **pasta de trabalho** (a pasta `knowledge_import/`, ou equivalente, na
+   raiz do projeto). **A estrutura de 5 pastas fixas em
+   `references/run-state.md` (`01-originais/`, `02-processados/`,
+   `03-exportacao/`, `04-scripts/`, `05-docs/`) é OBRIGATÓRIA e não
+   negociável** — nunca invente uma estrutura interna alternativa (não
+   existe mais `01-extraido/02-convertido/03-pacote`; essa convenção foi
+   abandonada), e nunca crie uma subpasta por lote dentro de
+   `02-processados`/`03-exportacao` (elas são sempre o estado ativo mais
+   recente, flat — ver a seção "Execução repetida" em `run-state.md` para o
+   que fazer quando já existir um lote anterior). Se o usuário não tiver uma
    origem real à mão, use `assets/example-source/` desta skill para rodar o
    pipeline de ponta a ponta com o artigo fictício embutido.
 2. Confirme o **Record Type Id de 15 caracteres** (não o de 18 — ver
@@ -44,14 +52,15 @@ desnecessária.
    acesso de leitura à org nesta sessão, pergunte ao usuário (ponto de
    decisão humana).
 3. Verifique se já existe uma execução anterior na pasta de trabalho
-   (`manifest.json`, `conversion-report.json`, `validation-result.json`) —
-   se existir, retome do ponto certo em vez de recomeçar do zero (regras de
-   retomada em `references/run-state.md`).
+   (`05-docs/manifest.json`, `05-docs/conversion-report.json`,
+   `05-docs/validation-result.json`) — se existir, retome do ponto certo em
+   vez de recomeçar do zero (regras de retomada em `references/run-state.md`).
 
 ## O loop (orquestração de subagentes)
 
-1. **Dispare `kb-inventory-mapper`** apontando a pasta de origem e a pasta
-   de trabalho. Ele extrai os ZIPs e grava `01-extraido/manifest.json` com o
+1. **Dispare `kb-inventory-mapper`** apontando a pasta de origem (dentro de
+   `01-originais/`) e a pasta de trabalho. Ele extrai os ZIPs para
+   `01-originais/extracted/` e grava `05-docs/manifest.json` com o
    inventário completo (painéis, imagens, links, listas por artigo). Não
    prossiga para a próxima etapa sem esse manifest — é a baseline de
    fidelidade de tudo que vem depois.
@@ -60,10 +69,13 @@ desnecessária.
    roda `convert.js` (trabalho mecânico — que já estrutura painéis titulados
    como accordion nativo, converte abas em accordion, emoji em unicode e
    caixas de aviso em destaque com cor de fundo, ver
-   `references/html-parsing-rules.md`) e depois **lê cada artigo gerado e
-   escreve Summary e Question__c de verdade** (trabalho de autoria — nunca
-   pule essa parte delegando para o script, que propositalmente só grava
-   placeholders).
+   `references/html-parsing-rules.md`), gravando tudo direto em
+   `02-processados/` (sem subpasta por lote — ver "Execução repetida" em
+   `references/run-state.md` se já houver conteúdo de um lote anterior lá),
+   e depois **lê cada artigo gerado e escreve Summary (template estruturado,
+   ver `references/content-authoring-rules.md`) e Question__c de verdade**
+   (trabalho de autoria — nunca pule essa parte delegando para o script, que
+   propositalmente só grava placeholders).
    - Lotes grandes (dezenas de artigos): pode disparar múltiplas instâncias
      de `kb-converter` em paralelo, cada uma responsável pela etapa de
      autoria de um subconjunto de artigos já convertidos mecanicamente,
@@ -93,8 +105,8 @@ desnecessária.
 5. **Empacote**: rode
    ```bash
    node .claude/skills/sf-knowledge-migrate/scripts/package-zip.js \
-     --source <pasta-de-trabalho>/02-convertido \
-     --out <pasta-de-trabalho>/03-pacote/knowledge_import.zip
+     --source <pasta-de-trabalho>/02-processados \
+     --out <pasta-de-trabalho>/03-exportacao/<nome-descritivo>.zip
    ```
    e valide a integridade com `unzip -t`.
 6. **Entregue**: caminho do `.zip` final, contagem de artigos, avisos não
@@ -147,8 +159,9 @@ o loop até concluir ou bloquear com um motivo nomeado.
   branco.
 - `references/html-parsing-rules.md` — por que parser por profundidade de
   tags, derivação de título, limitações conhecidas.
-- `references/content-authoring-rules.md` — regras de Summary (250/1000
-  caracteres) e Question__c (pergunta natural, não keywords) — e por que é
+- `references/content-authoring-rules.md` — template estruturado de Summary
+  (linha de fato principal + linhas com rótulo como AÇÃO/ENCAMINHAR/EXCEÇÃO)
+  e Question__c (pergunta natural, não keywords) — e por que é
   o agente quem escreve, nunca um script.
 - `references/known-import-errors.md` — tabela de erros reais do Import
   Wizard já enfrentados, causa raiz e como esta skill evita cada um.

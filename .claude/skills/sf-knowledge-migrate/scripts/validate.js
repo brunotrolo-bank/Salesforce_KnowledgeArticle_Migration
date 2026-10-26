@@ -35,26 +35,32 @@ function countTag(html, re) {
   return (clean.match(re) || []).length;
 }
 
-function parseCsvLine(line) {
-  // Parser simples respeitando aspas duplas — suficiente para o CSV que
-  // convert.js gera (sem quebras de linha dentro de campo).
-  const fields = [];
+// Parser de CSV completo (não por linha): respeita aspas duplas através de
+// TODO o arquivo, inclusive quebras de linha reais dentro de um campo entre
+// aspas (RFC 4180, válido — é exatamente o que o template estruturado de
+// Summary usa, ver content-authoring-rules.md). Um split('\n') ingênuo antes
+// de parsear quebraria qualquer Summary multi-linha no meio do registro.
+function parseCsv(content) {
+  const rows = [];
+  let row = [];
   let cur = '';
   let inQuotes = false;
-  for (let i = 0; i < line.length; i++) {
-    const c = line[i];
+  for (let i = 0; i < content.length; i++) {
+    const c = content[i];
     if (inQuotes) {
-      if (c === '"' && line[i + 1] === '"') { cur += '"'; i++; }
+      if (c === '"' && content[i + 1] === '"') { cur += '"'; i++; }
       else if (c === '"') { inQuotes = false; }
       else { cur += c; }
     } else {
       if (c === '"') inQuotes = true;
-      else if (c === ',') { fields.push(cur); cur = ''; }
+      else if (c === ',') { row.push(cur); cur = ''; }
+      else if (c === '\r') { /* ignora CR, trata CRLF como LF */ }
+      else if (c === '\n') { row.push(cur); cur = ''; rows.push(row); row = []; }
       else cur += c;
     }
   }
-  fields.push(cur);
-  return fields;
+  if (cur !== '' || row.length > 0) { row.push(cur); rows.push(row); }
+  return rows.filter(r => !(r.length === 1 && r[0] === ''));
 }
 
 function main() {
@@ -69,8 +75,9 @@ function main() {
 
   const manifest = JSON.parse(fs.readFileSync(manifestPath, 'utf8'));
   const csvPath = path.join(convertedDir, 'import.csv');
-  const csvLines = fs.readFileSync(csvPath, 'utf8').split('\n').filter(Boolean);
-  const header = parseCsvLine(csvLines[0]);
+  const csvContent = fs.readFileSync(csvPath, 'utf8');
+  const allRows = parseCsv(csvContent);
+  const header = allRows[0] || [];
 
   const colIndex = (name) => header.indexOf(name);
   const idxTitle = colIndex('Title');
@@ -94,7 +101,7 @@ function main() {
     });
   }
 
-  const dataRows = csvLines.slice(1).map(parseCsvLine);
+  const dataRows = allRows.slice(1);
 
   for (let i = 0; i < dataRows.length; i++) {
     const row = dataRows[i];

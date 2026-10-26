@@ -11,7 +11,10 @@
  * sobreviverem até o pacote final (ver validate.js).
  *
  * Uso:
- *   node convert.js --source <pasta-extraída> --out <pasta-saída> --record-type-id <Id de 15 chars> [--category <coluna> --category-value <valor> --channels <valor>]
+ *   node convert.js --source <pasta-extraída> --out <pasta-saída> --record-type-id <Id de 15 chars> [--category <coluna> --category-value <valor> --channels <valor> --report-out <caminho-do-conversion-report.json>]
+ *
+ * Layout de 5 pastas fixas desta skill (ver references/run-state.md):
+ *   node convert.js --source 01-originais/extracted --out 02-processados --record-type-id <Id> --category <col> --category-value <valor> --report-out 05-docs/conversion-report.json
  */
 const fs = require('fs');
 const path = require('path');
@@ -340,6 +343,7 @@ function main() {
   const CATEGORY_COLUMN = args.category || 'datacategorygroup.YourCategoryGroup';
   const CATEGORY_VALUE = args['category-value'] || '';
   const CHANNELS = args.channels || 'application+sites';
+  const REPORT_OUT = args['report-out'];
 
   if (!SOURCE || !OUTPUT) {
     console.error('Uso: node convert.js --source <pasta-extraída> --out <pasta-saída> --record-type-id <Id de 15 chars> [--category <coluna> --category-value <valor> --channels <valor>]');
@@ -431,7 +435,14 @@ function main() {
   fs.writeFileSync(path.join(OUTPUT, 'import.csv'), csvLines.join('\n'), 'utf8');
   fs.writeFileSync(path.join(OUTPUT, 'content.properties'), 'CSVEncoding=UTF8\nRTAEncoding=UTF8\nCSVSeparator=,\n', 'utf8');
   fs.writeFileSync(path.join(OUTPUT, 'data', 'image.html'), '<!-- Image references for Knowledge articles -->\n', 'utf8');
-  fs.writeFileSync(path.join(OUTPUT, 'conversion-report.json'), JSON.stringify(report, null, 2), 'utf8');
+  // --report-out é explícito porque o layout de 5 pastas fixas desta skill
+  // (ver references/run-state.md) grava relatórios em 05-docs/, separado da
+  // saída de dados em 02-processados/ — sem isso, o relatório ficava
+  // misturado com import.csv/data/ e exigia um passo manual de mover depois
+  // (mesma classe de erro já corrigida em extract-zips.js/--manifest-out).
+  const reportPath = REPORT_OUT || path.join(OUTPUT, 'conversion-report.json');
+  fs.mkdirSync(path.dirname(reportPath), { recursive: true });
+  fs.writeFileSync(reportPath, JSON.stringify(report, null, 2), 'utf8');
 
   console.log(`\n${report.length} artigo(s) convertido(s). Relatório: conversion-report.json`);
   console.log(`⚠️  Summary e Question__c de todos os artigos contêm placeholders — o subagente kb-converter (ou o agente da sessão) precisa lê-los e escrever conteúdo real antes do empacotamento final.`);

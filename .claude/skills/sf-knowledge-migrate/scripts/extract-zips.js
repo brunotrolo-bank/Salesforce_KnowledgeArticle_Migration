@@ -10,7 +10,10 @@
  * sozinho — diferente de package-zip.js, que escreve ZIP sem dependências).
  *
  * Uso:
- *   node extract-zips.js --source <pasta-com-zips> --out <pasta-destino>
+ *   node extract-zips.js --source <pasta-com-zips> --out <pasta-destino> [--manifest-out <caminho-do-manifest.json>]
+ *
+ * Layout de 5 pastas fixas desta skill (ver references/run-state.md):
+ *   node extract-zips.js --source 01-originais/<zips> --out 01-originais/extracted --manifest-out 05-docs/manifest.json
  */
 const fs = require('fs');
 const path = require('path');
@@ -76,11 +79,20 @@ function extractAndInventory(source, out, zips) {
         // "<img" como texto (comum em HTML anotado) não deve contar como
         // tag real — já causou falso-positivo de divergência no validate.js.
         const htmlNoComments = html.replace(/<!--[\s\S]*?-->/g, '');
+        // Emoji do Google Noto (<img src="...notoemoji...">) é convertido de
+        // propósito para caractere unicode real por convert.js
+        // (convertEmojiImages) — não é perda de conteúdo, é uma melhoria
+        // documentada. Contar essas tags como "imagem" no inventário de
+        // origem gera falso-positivo de fidelidade em validate.js (a
+        // contagem convertida nunca bate, porque o emoji nunca devia
+        // sobreviver como <img>). O inventário conta só imagens reais.
+        const imgTags = htmlNoComments.match(/<img\b[^>]*>/gi) || [];
+        const realImages = imgTags.filter(tag => !/notoemoji/i.test(tag));
         manifestArticles.push({
           dir: baseName,
           zipFile,
           panels: countPanels(html),
-          images: (htmlNoComments.match(/<img/gi) || []).length,
+          images: realImages.length,
           links: (htmlNoComments.match(/<a href/gi) || []).length,
           lists: (htmlNoComments.match(/<ul>|<ol>/gi) || []).length,
         });
@@ -120,7 +132,13 @@ function main() {
   console.log(`Extraindo ${zips.length} ZIP(s) de ${source}...`);
   const { extracted, manifestArticles } = extractAndInventory(source, out, zips);
 
-  const manifestPath = path.join(out, '..', 'manifest.json');
+  // --manifest-out é explícito porque o layout de 5 pastas fixas desta
+  // skill (ver references/run-state.md) grava o manifest em 05-docs/, que
+  // não tem relação de "pasta pai" com --out (01-originais/extracted) —
+  // inferir o caminho a partir de --out já causou o manifest parar na pasta
+  // errada numa execução real.
+  const manifestPath = args['manifest-out'] || path.join(out, '..', 'manifest.json');
+  fs.mkdirSync(path.dirname(manifestPath), { recursive: true });
   fs.writeFileSync(manifestPath, JSON.stringify({ totalZips: zips.length, articles: manifestArticles }, null, 2), 'utf8');
 
   console.log(`\nExtração concluída: ${extracted.filter(e => e.hasIndex).length}/${zips.length} com index.html válido.`);

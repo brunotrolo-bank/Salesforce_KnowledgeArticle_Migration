@@ -23,12 +23,14 @@ gerou a conversão.
 1. Roda o script determinístico:
    ```bash
    node .claude/skills/sf-knowledge-migrate/scripts/validate.js \
-     --manifest <pasta>/01-extraido/manifest.json \
-     --converted <pasta>/02-convertido
+     --manifest <pasta-de-trabalho>/05-docs/manifest.json \
+     --converted <pasta-de-trabalho>/02-processados
    ```
 2. Lê o JSON de saída (`{ ok, totalArtigos, problemas }`) — nunca aceita o
-   que o subagente `kb-converter` disse que fez; recalcula do zero.
-3. Se `03-pacote/knowledge_import.zip` já existir, roda `unzip -t` nele como
+   que o subagente `kb-converter` disse que fez; recalcula do zero. Se for
+   gravar o resultado em disco, grave em `05-docs/validation-result.json`
+   (ver `references/run-state.md`).
+3. Se já existir um `.zip` em `03-exportacao/`, roda `unzip -t` nele como
    checagem adicional de integridade do arquivo final.
 4. Separa os problemas por `severity`:
    - `bloqueante` → o orquestrador **não pode** empacotar/entregar até

@@ -23,7 +23,8 @@ qualquer transformação acontecer.
 2. Roda:
    ```bash
    node .claude/skills/sf-knowledge-migrate/scripts/extract-zips.js \
-     --source <pasta-com-zips> --out <pasta-destino>/01-extraido
+     --source <pasta-de-origem-dentro-de-01-originais> --out <pasta-de-trabalho>/01-originais/extracted \
+     --manifest-out <pasta-de-trabalho>/05-docs/manifest.json
    ```
 3. O script já extrai e grava `manifest.json` com, por artigo: `dir`,
    `zipFile`, `panels`, `images`, `links`, `lists`.

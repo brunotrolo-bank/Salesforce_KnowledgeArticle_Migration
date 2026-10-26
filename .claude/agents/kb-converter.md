@@ -3,12 +3,13 @@ name: kb-converter
 description: >-
   Converte os artigos extraídos (manifest.json já existe) para o formato de
   importação do Salesforce Knowledge: roda convert.js e, para CADA artigo,
-  lê o HTML gerado e escreve Summary (texto corrido, informação densa nos
-  primeiros 250 caracteres, até 1000 no total) e Question__c (pergunta em
-  linguagem natural, não keywords) de verdade — substituindo os placeholders
-  que o script deixa de propósito. Use depois que kb-inventory-mapper já
-  gerou o manifest, ou quando kb-fidelity-validator apontar um problema
-  estrutural específico que exige reconverter um artigo.
+  lê o HTML gerado e escreve Summary (template estruturado — linha de fato
+  principal + linhas com rótulo como AÇÃO/ENCAMINHAR/EXCEÇÃO, ver
+  content-authoring-rules.md) e Question__c (pergunta em linguagem natural,
+  não keywords) de verdade — substituindo os placeholders que o script
+  deixa de propósito. Use depois que kb-inventory-mapper já gerou o
+  manifest, ou quando kb-fidelity-validator apontar um problema estrutural
+  específico que exige reconverter um artigo.
 tools: Read, Edit, Bash, Glob, Grep
 ---
 
@@ -19,24 +20,29 @@ trabalho de autoria de conteúdo que nenhum script consegue fazer sozinho.
 
 ## O que faz
 
-1. Roda o conversor mecânico:
+1. Roda o conversor mecânico, gravando direto em `02-processados/` (sem
+   subpasta por lote — ver "Execução repetida" em `references/run-state.md`
+   se já houver conteúdo de um lote anterior lá):
    ```bash
    node .claude/skills/sf-knowledge-migrate/scripts/convert.js \
-     --source <pasta-extraída> --out <pasta-destino>/02-convertido \
+     --source <pasta-de-trabalho>/01-originais/extracted --out <pasta-de-trabalho>/02-processados \
      --record-type-id <Id de 15 caracteres, confirmado via field-mapping.md> \
      --category <coluna-de-categoria-da-sua-org> --category-value <valor> \
-     --channels <canais>
+     --channels <canais> \
+     --report-out <pasta-de-trabalho>/05-docs/conversion-report.json
    ```
-2. Lê `conversion-report.json` para saber quantos artigos foram gerados e
-   quais usaram o fallback de "nenhum panel-body encontrado" (revisar esses
-   com atenção extra).
+2. Leia `05-docs/conversion-report.json` para saber quantos artigos foram
+   gerados e quais usaram o fallback de "nenhum panel-body encontrado"
+   (revisar esses com atenção extra).
 3. **Para cada artigo**, abre `data/article_NN.html` e:
    - Lê o conteúdo completo (todas as seções/painéis, não só o título).
    - Escreve o `Summary` real no `import.csv` (editando a linha
      correspondente, substituindo
-     `__TODO_SUMMARY_NAO_PREENCHIDO_PELO_AGENTE__`), seguindo
-     `references/content-authoring-rules.md` (prosa, 250 primeiros
-     caracteres densos, até 1000 no total — nunca copiar o título).
+     `__TODO_SUMMARY_NAO_PREENCHIDO_PELO_AGENTE__`), seguindo o template
+     estruturado de `references/content-authoring-rules.md` (linha de fato
+     principal obrigatória + linhas com rótulo como AÇÃO/ENCAMINHAR/EXCEÇÃO
+     só quando houver informação real — nunca copiar o título). Lembre-se:
+     `\n` real entre as linhas no valor do CSV, não `\\n` escapado.
    - Escreve a pergunta natural em `data/article_NN_question.html`
      (substituindo `__TODO_QUESTION_NAO_PREENCHIDO_PELO_AGENTE__`), seguindo
      a mesma referência (pergunta real, nunca lista de keywords).

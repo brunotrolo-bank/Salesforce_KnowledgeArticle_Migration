@@ -19,20 +19,84 @@ algum desses placeholders sobreviver até o pacote final. A etapa de autoria
 agente da sessão) lendo o `article_NN.html` gerado — nunca por heurística de
 string.
 
-## Regra do campo Summary
+## Regra do campo Summary — template estruturado (aprovado 2026-10-26)
 
-- Texto corrido (prosa), **não** lista de keywords, **não** duplicação do
-  título.
-- **Limite:** até 1000 caracteres (confirmar o limite real do campo na sua
-  org — pode variar).
-- **A informação mais importante do artigo deve estar nos primeiros 250
-  caracteres.** Isso não é estético: é o trecho que aparece truncado em
-  componentes de busca/listagem que mostram só um preview do Summary. Um
-  resumo que começa com "Este artigo trata sobre..." desperdiça os 250
-  caracteres mais visíveis dizendo nada.
-- Boa prática: comece a frase já com o fato principal (data, valor, regra
-  central, nome da política/campanha), do mesmo jeito que um lead de notícia
-  não enterra a informação principal no segundo parágrafo.
+**Por que não é mais texto corrido**: a primeira versão desta regra pedia um
+parágrafo único em prosa. Na prática, um operador de atendimento lendo isso
+sob pressão (cliente na linha) tem dificuldade de escanear rapidamente onde
+está o fato principal, a ação a tomar e o encaminhamento — tudo misturado em
+frases longas separadas por vírgula. `Summary` é tecnicamente um **Text Area
+simples** (não Rich Text — sem negrito/cor), mas **suporta múltiplas linhas
+reais** (`\n`) quando exibido em páginas padrão do Salesforce (Lightning
+Record Page). O CSV já lida bem com isso: um valor entre aspas com `\n`
+embutido é CSV válido (RFC 4180) e o Import Wizard importa corretamente —
+não foi necessário mudar `convert.js`/`csvEscape` para isso, só a convenção
+de redação.
+
+### Estrutura
+
+```
+{FATO PRINCIPAL — o quê + quando/vigência + produto/canal, até ~180 caracteres}
+AÇÃO: {o que o atendente/robô faz, resumido em sequência}
+ENCAMINHAR: {fila/habilidade/transferência — só se houver}
+EXCEÇÃO: {o que NÃO muda / ressalva — só se houver}
+```
+
+### Regras de cada parte
+
+1. **Linha 1 é obrigatória e sozinha** — sem rótulo, é uma frase completa com
+   o fato mais importante do artigo (data/vigência, produto, canal, regra
+   central). Até ~180 caracteres. **Esta linha precisa fazer sentido sozinha**,
+   porque é o único trecho garantido de aparecer em qualquer preview truncado
+   (busca global, Knowledge Sidebar, componentes de listagem) — contextos
+   onde a quebra de linha das linhas seguintes não é preservada.
+2. **Linhas com rótulo são opcionais — só entram se houver informação real.**
+   Nunca force um rótulo vazio ("ENCAMINHAR: não aplicável") só para seguir o
+   template; um artigo simples pode ter só a linha 1.
+3. **Rótulos em maiúscula, seguidos de dois-pontos, um por linha.** Os 3
+   catalogados acima (`AÇÃO`, `ENCAMINHAR`, `EXCEÇÃO`) cobrem o caso mais
+   comum (fluxo operacional com transferência), mas **a lista não é
+   fechada** — use o rótulo que o conteúdo pedir, com o mesmo princípio de
+   objetividade. Rótulos adicionais já observados como úteis:
+   - `VALOR:` — percentual, valor monetário, desconto
+   - `PRAZO:` — vigência/validade quando não cabe na linha 1
+   - `ELEGIBILIDADE:` — quem se qualifica / critério de inclusão
+4. **Limite total continua 1000 caracteres** (confirmar o limite real do
+   campo na org de destino), mas na prática um Summary bem escrito nesse
+   formato fica bem abaixo disso (3-4 linhas curtas).
+5. Nunca duplicar o título, nunca virar lista de keywords.
+
+### Exemplo completo (antes → depois)
+
+**Antes (texto corrido, difícil de escanear)**:
+> A partir de 12/05/2026, novo fluxo de retenção de produtos massificados no
+> canal Digital, iniciando pelo produto SPPR: o robô argumenta os
+> benefícios, oferece downgrade e, se o cliente insistir, transfere para a
+> empresa parceira Tech4Humans para uma última tentativa ou conclusão do
+> cancelamento. Transbordos durante o horário comercial devem ser
+> direcionados às habilidades W_OD_RETENC_MASSIF_CARTAO_MOT (WhatsApp) ou
+> C_OD_RETENC_MASSIF_CARTAO_MOT (Chat do App); o atendimento por Voz segue
+> sem alterações.
+
+**Depois (template estruturado)**:
+```
+Novo fluxo de retenção de massificados no Digital (produto SPPR), vigente desde 12/05/2026.
+AÇÃO: robô argumenta benefícios, oferece downgrade e, se o cliente insistir, transfere para a Tech4Humans (última tentativa ou cancelamento).
+ENCAMINHAR: transbordo comercial via habilidades W_OD_RETENC_MASSIF_CARTAO_MOT (WhatsApp) ou C_OD_RETENC_MASSIF_CARTAO_MOT (Chat do App).
+EXCEÇÃO: atendimento por Voz segue sem alterações.
+```
+Mesma informação, ~380 caracteres, mas escaneável em segundos sob pressão.
+
+### Consumidor próprio: `knowledgeEnhanced` (LWC)
+
+O componente de busca Knowledge na Utility Bar (projeto `CoreEvol - T4H`,
+`force-app/main/default/lwc/knowledgeEnhanced/`) usa `Summary` como snippet
+nos cards de resultado e no Detail View. O CSS desse componente foi ajustado
+(`white-space: pre-line` em `.card-snippet` e `.article-body-text`) para
+respeitar as quebras de linha deste template — se este template for
+reaproveitado para alimentar outro componente customizado, confirme que o
+CSS dele também preserva `\n` (comportamento padrão do navegador é colapsar
+quebras de linha em texto plano).
 
 ## Regra do campo Question (padrão FAQ)
 
@@ -71,7 +135,9 @@ documentação atualizada do Salesforce antes de aplicar em escala.
 Para cada `article_NN.html` gerado por `convert.js`:
 1. Ler o conteúdo completo (não só o título).
 2. Escrever o `Summary` no `import.csv` (substituindo o placeholder),
-   seguindo a regra dos 250/1000 caracteres acima.
+   seguindo o template estruturado (linha 1 obrigatória + linhas com rótulo
+   opcionais) descrito acima — lembrar de escrever `\n` real entre as linhas
+   no valor do CSV, não `\\n` escapado.
 3. Escrever a pergunta natural em `data/article_NN_question.html`
    (substituindo o placeholder), seguindo a regra de FAQ acima.
 4. Nunca copiar/parafrasear o título como Summary — resuma o **conteúdo**.
