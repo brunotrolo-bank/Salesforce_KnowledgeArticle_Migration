@@ -330,6 +330,7 @@ function slugify(s) {
 // verdade, lendo o article_NN.html gerado. validate.js falha se sobreviver.
 const SUMMARY_PLACEHOLDER = '__TODO_SUMMARY_NAO_PREENCHIDO_PELO_AGENTE__';
 const QUESTION_PLACEHOLDER = '__TODO_QUESTION_NAO_PREENCHIDO_PELO_AGENTE__';
+const SUMMARY_ENHANCED_PLACEHOLDER = '__TODO_SUMMARY_ENHANCED_NAO_GERADO__';
 
 function csvEscape(s) {
   return String(s).replace(/"/g, '""');
@@ -374,7 +375,7 @@ function main() {
     .map(d => d.name)
     .sort();
 
-  const csvLines = [`Title,Summary,URLName,RecordTypeId,${CATEGORY_COLUMN},channels,Question__c,Answer__c`];
+  const csvLines = [`Title,Summary,URLName,RecordTypeId,${CATEGORY_COLUMN},channels,Question__c,Answer__c,Summary_Enhanced__c`];
   const report = [];
   let num = 1;
 
@@ -396,6 +397,7 @@ function main() {
 
     const articleFile = `article_${String(num).padStart(2, '0')}.html`;
     const questionFile = `article_${String(num).padStart(2, '0')}_question.html`;
+    const summaryEnhancedFile = `article_${String(num).padStart(2, '0')}_summary_enhanced.html`;
     const finalHtml = buildArticleHtml(docTitle, panelTitles, panelBodies);
     fs.writeFileSync(path.join(OUTPUT, 'data', articleFile), finalHtml, 'utf8');
 
@@ -409,12 +411,23 @@ function main() {
       'utf8'
     );
 
+    // Summary_Enhanced__c (Rich Text Area, ver content-authoring-rules.md):
+    // versão formatada do mesmo Summary, para exibição no LWC. Gerada de
+    // verdade por scripts/format-summary-enhanced.js DEPOIS que o agente
+    // escrever o Summary real — aqui só o placeholder (mecânico, sem
+    // conteúdo ainda).
+    fs.writeFileSync(
+      path.join(OUTPUT, 'data', summaryEnhancedFile),
+      `<!DOCTYPE html>\n<html>\n<head><meta charset="UTF-8"></head>\n<body>\n<p>${SUMMARY_ENHANCED_PLACEHOLDER}</p>\n</body>\n</html>`,
+      'utf8'
+    );
+
     const urlName = slugify(docTitle);
     const titleEsc = csvEscape(docTitle);
     const summary = csvEscape(SUMMARY_PLACEHOLDER);
 
     csvLines.push(
-      `"${titleEsc}","${summary}","${urlName}","${RECORD_TYPE_ID}","${CATEGORY_VALUE}","${CHANNELS}","data/${questionFile}","data/${articleFile}"`
+      `"${titleEsc}","${summary}","${urlName}","${RECORD_TYPE_ID}","${CATEGORY_VALUE}","${CHANNELS}","data/${questionFile}","data/${articleFile}","data/${summaryEnhancedFile}"`
     );
 
     report.push({

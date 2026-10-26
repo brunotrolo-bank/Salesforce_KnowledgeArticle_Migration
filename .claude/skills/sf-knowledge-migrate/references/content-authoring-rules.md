@@ -91,12 +91,43 @@ Mesma informação, ~380 caracteres, mas escaneável em segundos sob pressão.
 
 O componente de busca Knowledge na Utility Bar (projeto `CoreEvol - T4H`,
 `force-app/main/default/lwc/knowledgeEnhanced/`) usa `Summary` como snippet
-nos cards de resultado e no Detail View. O CSS desse componente foi ajustado
-(`white-space: pre-line` em `.card-snippet` e `.article-body-text`) para
-respeitar as quebras de linha deste template — se este template for
-reaproveitado para alimentar outro componente customizado, confirme que o
-CSS dele também preserva `\n` (comportamento padrão do navegador é colapsar
-quebras de linha em texto plano).
+nos **cards de resultado** (lista) — o CSS lá (`white-space: pre-line` em
+`.card-snippet`) preserva as quebras de linha deste template para o preview
+curto.
+
+Na **tela de detalhe** (quando o operador abre o artigo), o componente usa
+`Summary_Enhanced__c` em vez do `Summary` plano, com fallback para o
+`Summary` se o campo estiver vazio — decisão de 2026-10-26: o `Summary`
+continua texto plano de propósito (é o que a busca nativa do Salesforce
+indexa/mostra em preview truncado), e o `Summary_Enhanced__c` (Rich Text
+Area) existe só para a leitura humana ficar genuinamente mais legível
+(negrito real, lista real), sem comprometer a busca.
+
+## `Summary_Enhanced__c` — gerado automaticamente, nunca autorado à parte
+
+**Não escreva o conteúdo de `Summary_Enhanced__c` manualmente.** Ele é
+derivado mecanicamente do `Summary` que você acabou de autorar, pelo script
+`scripts/format-summary-enhanced.js`:
+```bash
+node .claude/skills/sf-knowledge-migrate/scripts/format-summary-enhanced.js \
+  --text "<o mesmo texto que você escreveu no Summary>" \
+  > <pasta-de-trabalho>/02-processados/data/article_NN_summary_enhanced.html
+```
+A linha 1 (fato principal) vira um parágrafo em negrito; cada linha
+`LABEL: texto` vira um item de lista com o rótulo em negrito. Isso é
+puramente mecânico porque o conteúdo **já foi** autorado uma vez, ao escrever
+o `Summary` — gerar o HTML de novo manualmente seria trabalho duplicado e
+arriscaria os dois textos divergirem com o tempo.
+
+Se o `Summary` desviar do template estruturado (texto corrido sem o padrão
+`LABEL: texto`), o script ainda funciona — trata a linha 1 como destaque e
+qualquer linha adicional sem rótulo como parágrafo normal (ver código-fonte
+do script para o comportamento exato).
+
+**Lembrete de compatibilidade**: `Summary_Enhanced__c` é um campo específico
+da org `CoreEvol - T4H` para o `knowledgeEnhanced` — ver a nota em
+`field-mapping.md` sobre removê-lo do CSV ao migrar para uma org sem esse
+campo.
 
 ## Regra do campo Question (padrão FAQ)
 
@@ -140,4 +171,7 @@ Para cada `article_NN.html` gerado por `convert.js`:
    no valor do CSV, não `\\n` escapado.
 3. Escrever a pergunta natural em `data/article_NN_question.html`
    (substituindo o placeholder), seguindo a regra de FAQ acima.
-4. Nunca copiar/parafrasear o título como Summary — resuma o **conteúdo**.
+4. Gerar `data/article_NN_summary_enhanced.html` a partir do mesmo `Summary`
+   do passo 2, rodando `scripts/format-summary-enhanced.js` (nunca autorar
+   esse conteúdo à mão — ver seção "gerado automaticamente" acima).
+5. Nunca copiar/parafrasear o título como Summary — resuma o **conteúdo**.

@@ -176,6 +176,7 @@ o loop até concluir ou bloquear com um motivo nomeado.
 | `scripts/convert.js` | Parseia HTML, deriva título/slug, gera CSV + artigos | Nunca escreve Summary/Question de verdade (só placeholder) |
 | `scripts/validate.js` | Compara fidelidade, checa placeholders e RecordType | Não corrige nada sozinho — só reporta |
 | `scripts/package-zip.js` | Empacota em `.zip` válido, sem dependências externas | Não valida conteúdo — só empacota |
+| `scripts/format-summary-enhanced.js` | Converte o Summary já autorado em HTML (`Summary_Enhanced__c`, campo específico de `CoreEvol - T4H`) | Não autora conteúdo novo — só formata o que já foi escrito |
 
 ## Artigo de exemplo (teste end-to-end sem dados reais)
 

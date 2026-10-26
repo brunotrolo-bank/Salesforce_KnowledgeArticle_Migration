@@ -85,6 +85,7 @@ function main() {
   const idxRecordType = colIndex('RecordTypeId');
   const idxQuestion = colIndex('Question__c');
   const idxAnswer = colIndex('Answer__c');
+  const idxSummaryEnhanced = colIndex('Summary_Enhanced__c');
 
   const requiredCols = { Title: idxTitle, Summary: idxSummary, RecordTypeId: idxRecordType, Question__c: idxQuestion, Answer__c: idxAnswer };
   const missingCols = Object.entries(requiredCols).filter(([, i]) => i === -1).map(([name]) => name);
@@ -150,6 +151,20 @@ function main() {
     if (!questionHtml || questionHtml.includes('__TODO_QUESTION')) {
       ok = false;
       results.push({ scope: `artigo-${num}`, problem: 'Question__c vazio ou com placeholder não substituído — precisa de uma pergunta em linguagem natural (ver content-authoring-rules.md)', severity: 'bloqueante' });
+    }
+
+    // 3b. Summary_Enhanced__c (via arquivo referenciado) — gerado por
+    // scripts/format-summary-enhanced.js a partir do Summary já autorado
+    // (ver content-authoring-rules.md). Coluna opcional só para não quebrar
+    // lotes convertidos antes desta feature existir.
+    if (idxSummaryEnhanced !== -1) {
+      const summaryEnhancedFile = row[idxSummaryEnhanced] ? row[idxSummaryEnhanced].replace(/^data\//, '') : null;
+      const summaryEnhancedPath = summaryEnhancedFile ? path.join(convertedDir, 'data', summaryEnhancedFile) : null;
+      const summaryEnhancedHtml = summaryEnhancedPath && fs.existsSync(summaryEnhancedPath) ? fs.readFileSync(summaryEnhancedPath, 'utf8') : '';
+      if (!summaryEnhancedHtml || summaryEnhancedHtml.includes('__TODO_SUMMARY_ENHANCED')) {
+        ok = false;
+        results.push({ scope: `artigo-${num}`, problem: 'Summary_Enhanced__c vazio ou com placeholder não substituído — rode scripts/format-summary-enhanced.js com o Summary já autorado (ver content-authoring-rules.md)', severity: 'bloqueante' });
+      }
     }
 
     // 4. RecordType — dois incidentes reais já ocorridos em produção:

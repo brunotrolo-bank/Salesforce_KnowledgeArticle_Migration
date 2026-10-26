@@ -22,10 +22,24 @@ Use um destes caminhos (o que estiver disponível no seu ambiente):
 | `channels` | — | — | Canais de publicação (ex.: `application+sites`) |
 | `Question__c` (ou campo equivalente de pergunta) | Rich Text Area | Ver regra de Rich Text abaixo |
 | `Answer__c` (ou campo equivalente de resposta) | Rich Text Area | Ver regra de Rich Text abaixo |
+| `Summary_Enhanced__c` (opcional — ver abaixo) | Rich Text Area | Mesma regra de arquivo da seção abaixo. Versão formatada do `Summary` para exibição em LWC; gerada por `scripts/format-summary-enhanced.js` a partir do `Summary` já autorado — nunca escrita à mão separadamente |
 
 Os nomes exatos de `Question__c`/`Answer__c` (ou quaisquer campos customizados
 equivalentes) **variam por org** — o que não varia são as regras de formato
 abaixo.
+
+## `Summary_Enhanced__c` é opcional e específico de um consumidor (LWC)
+
+`convert.js` sempre grava a coluna `Summary_Enhanced__c` no CSV (consistência
+do script entre execuções), mas esse campo só existe em orgs que tenham um
+LWC consumidor que precise de um Summary formatado (ver
+`content-authoring-rules.md`). **Antes de importar numa org que não tenha
+esse campo customizado**, remova a coluna inteira do `import.csv` (e os
+arquivos `article_NN_summary_enhanced.html` correspondentes do pacote) —
+senão o Import Wizard falha com o erro de header não mapeável já catalogado
+em `known-import-errors.md`. Confirme a existência do campo no schema real
+da org de destino antes de decidir manter ou remover a coluna (mesma regra
+de ouro deste documento).
 
 ## Regra de tipo: Text Area vs. Rich Text Area
 

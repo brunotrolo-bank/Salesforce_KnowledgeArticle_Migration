@@ -46,6 +46,15 @@ trabalho de autoria de conteúdo que nenhum script consegue fazer sozinho.
    - Escreve a pergunta natural em `data/article_NN_question.html`
      (substituindo `__TODO_QUESTION_NAO_PREENCHIDO_PELO_AGENTE__`), seguindo
      a mesma referência (pergunta real, nunca lista de keywords).
+   - Gera `data/article_NN_summary_enhanced.html` a partir do `Summary` que
+     acabou de escrever, rodando:
+     ```bash
+     node .claude/skills/sf-knowledge-migrate/scripts/format-summary-enhanced.js \
+       --text "<o Summary que você acabou de escrever>" \
+       > <pasta-de-trabalho>/02-processados/data/article_NN_summary_enhanced.html
+     ```
+     Nunca autore esse conteúdo manualmente — é derivação mecânica do Summary
+     (ver `references/content-authoring-rules.md`).
 4. Reporta ao orquestrador: quantos artigos tiveram Summary/Question
    escritos, e qualquer artigo onde o conteúdo original é ambíguo demais
    para resumir com confiança (reportar como ponto de atenção, não inventar).
