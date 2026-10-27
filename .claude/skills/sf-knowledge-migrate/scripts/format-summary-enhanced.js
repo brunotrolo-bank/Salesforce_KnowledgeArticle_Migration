@@ -27,6 +27,19 @@ function escapeHtml(s) {
 
 const LABEL_LINE_RE = /^([A-ZÇÃÕÁÉÍÓÚÀÂÊÎÔÛ][A-ZÇÃÕÁÉÍÓÚÀÂÊÎÔÛ0-9 ]*):\s*(.+)$/;
 
+// Ícone por rótulo: escaneamento visual mais rápido que ler a palavra —
+// mesmo princípio da simplificação de linguagem, para um público treinado a
+// seguir procedimento, não a interpretar texto (decisão 2026-10-26). Rótulo
+// fora desta lista (extensão aberta, ver content-authoring-rules.md) não
+// ganha ícone — só o negrito, sem quebrar a formatação.
+const LABEL_ICONS = {
+  'FAÇA': '✅',
+  'NÃO FAÇA': '🚫',
+  'ENCAMINHE PARA': '➡️',
+  'QUANTO': '💰',
+  'QUEM GANHA': '🏆',
+};
+
 function toRichHtml(summaryText) {
   const lines = String(summaryText || '').split('\n').map(l => l.trim()).filter(Boolean);
   if (lines.length === 0) return '';
@@ -38,7 +51,9 @@ function toRichHtml(summaryText) {
   for (const line of lines) {
     const m = line.match(LABEL_LINE_RE);
     if (m) {
-      listItems.push(`<li><strong>${escapeHtml(m[1])}:</strong> ${escapeHtml(m[2])}</li>`);
+      const icon = LABEL_ICONS[m[1].toUpperCase()];
+      const labelHtml = icon ? `${icon} <strong>${escapeHtml(m[1])}:</strong>` : `<strong>${escapeHtml(m[1])}:</strong>`;
+      listItems.push(`<li>${labelHtml} ${escapeHtml(m[2])}</li>`);
     } else if (!firstLineConsumed) {
       // Linha 1 (fato principal, sem rótulo) — sempre vira um parágrafo em destaque.
       html += `<p><strong>${escapeHtml(line)}</strong></p>`;
