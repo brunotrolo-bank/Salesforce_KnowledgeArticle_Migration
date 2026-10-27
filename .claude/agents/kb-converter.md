@@ -4,7 +4,7 @@ description: >-
   Converte os artigos extraídos (manifest.json já existe) para o formato de
   importação do Salesforce Knowledge: roda convert.js e, para CADA artigo,
   lê o HTML gerado e escreve Summary (template estruturado — linha de fato
-  principal + linhas com rótulo como AÇÃO/ENCAMINHAR/EXCEÇÃO, ver
+  principal + linhas com rótulo como FAÇA/NÃO FAÇA/ENCAMINHE PARA, ver
   content-authoring-rules.md) e Question__c (pergunta em linguagem natural,
   não keywords) de verdade — substituindo os placeholders que o script
   deixa de propósito. Use depois que kb-inventory-mapper já gerou o
@@ -40,7 +40,7 @@ trabalho de autoria de conteúdo que nenhum script consegue fazer sozinho.
      correspondente, substituindo
      `__TODO_SUMMARY_NAO_PREENCHIDO_PELO_AGENTE__`), seguindo o template
      estruturado de `references/content-authoring-rules.md` (linha de fato
-     principal obrigatória + linhas com rótulo como AÇÃO/ENCAMINHAR/EXCEÇÃO
+     principal obrigatória + linhas com rótulo como FAÇA/NÃO FAÇA/ENCAMINHE PARA
      só quando houver informação real — nunca copiar o título). Lembre-se:
      `\n` real entre as linhas no valor do CSV, não `\\n` escapado.
    - Escreve a pergunta natural em `data/article_NN_question.html`

@@ -36,39 +36,56 @@ de redação.
 ### Estrutura
 
 ```
-{FATO PRINCIPAL — o quê + quando/vigência + produto/canal, até ~180 caracteres}
-AÇÃO: {o que o atendente/robô faz, resumido em sequência}
-ENCAMINHAR: {fila/habilidade/transferência — só se houver}
-EXCEÇÃO: {o que NÃO muda / ressalva — só se houver}
+{FATO PRINCIPAL — frase curta, linguagem simples, até ~180 caracteres}
+FAÇA: {o que o atendente/robô faz — verbo no imperativo, frases curtas}
+NÃO FAÇA: {proibição explícita — só se houver}
+ENCAMINHE PARA: {fila/habilidade/transferência — só se houver}
+QUANTO: {valor, percentual, desconto — só se houver}
+QUEM GANHA: {quem se qualifica/tem direito — só se houver}
 ```
+
+### Público-alvo: escreva para quem segue procedimento, não para quem analisa (decisão 2026-10-26)
+
+O operador de atendimento que lê isso é treinado para ser **procedural**
+(segue passo a passo), não para interpretar texto corporativo abstrato.
+Palavras como "elegibilidade", "desclassificação" ou "critério de
+desempate" — mesmo organizadas num template limpo — ainda exigem
+interpretação. A regra, então, não é só estruturar em linhas: é também
+**escrever em português simples e direto**, como quem explica um
+procedimento a um colega novo:
+- Frases curtas. Uma ideia por frase.
+- Verbo no imperativo ("fale", "ofereça", "confira"), não substantivo
+  abstrato ("argumentação", "elegibilidade").
+- Números e nomes de campo/habilidade continuam exatos (não simplifique um
+  valor ou um código de fila) — simplifique a explicação ao redor deles, não
+  o dado em si.
+- Se uma frase precisar de duas leituras para entender, reescreva mais curta.
 
 ### Regras de cada parte
 
 1. **Linha 1 é obrigatória e sozinha** — sem rótulo, é uma frase completa com
    o fato mais importante do artigo (data/vigência, produto, canal, regra
-   central). Até ~180 caracteres. **Esta linha precisa fazer sentido sozinha**,
-   porque é o único trecho garantido de aparecer em qualquer preview truncado
-   (busca global, Knowledge Sidebar, componentes de listagem) — contextos
-   onde a quebra de linha das linhas seguintes não é preservada.
+   central), em linguagem simples. Até ~180 caracteres. **Esta linha precisa
+   fazer sentido sozinha**, porque é o único trecho garantido de aparecer em
+   qualquer preview truncado (busca global, Knowledge Sidebar, componentes
+   de listagem) — contextos onde a quebra de linha das linhas seguintes não
+   é preservada.
 2. **Linhas com rótulo são opcionais — só entram se houver informação real.**
-   Nunca force um rótulo vazio ("ENCAMINHAR: não aplicável") só para seguir o
-   template; um artigo simples pode ter só a linha 1.
-3. **Rótulos em maiúscula, seguidos de dois-pontos, um por linha.** Os 3
-   catalogados acima (`AÇÃO`, `ENCAMINHAR`, `EXCEÇÃO`) cobrem o caso mais
-   comum (fluxo operacional com transferência), mas **a lista não é
-   fechada** — use o rótulo que o conteúdo pedir, com o mesmo princípio de
-   objetividade. Rótulos adicionais já observados como úteis:
-   - `VALOR:` — percentual, valor monetário, desconto
-   - `PRAZO:` — vigência/validade quando não cabe na linha 1
-   - `ELEGIBILIDADE:` — quem se qualifica / critério de inclusão
+   Nunca force um rótulo vazio ("ENCAMINHE PARA: não aplicável") só para
+   seguir o template; um artigo simples pode ter só a linha 1.
+3. **Rótulos em maiúscula, seguidos de dois-pontos, um por linha.** Os 5
+   catalogados acima (`FAÇA`, `NÃO FAÇA`, `ENCAMINHE PARA`, `QUANTO`,
+   `QUEM GANHA`) cobrem o caso mais comum, mas **a lista não é fechada** —
+   use o rótulo que o conteúdo pedir, sempre em linguagem direta (prefira
+   `QUEM GANHA` a `ELEGIBILIDADE`, `NÃO FAÇA` a `PROIBIÇÃO`, etc.).
 4. **Limite total continua 1000 caracteres** (confirmar o limite real do
    campo na org de destino), mas na prática um Summary bem escrito nesse
-   formato fica bem abaixo disso (3-4 linhas curtas).
+   formato fica bem abaixo disso (3-5 linhas curtas).
 5. Nunca duplicar o título, nunca virar lista de keywords.
 
-### Exemplo completo (antes → depois)
+### Exemplo completo (texto corrido → template corporativo → template simples)
 
-**Antes (texto corrido, difícil de escanear)**:
+**Original (texto corrido, difícil de escanear)**:
 > A partir de 12/05/2026, novo fluxo de retenção de produtos massificados no
 > canal Digital, iniciando pelo produto SPPR: o robô argumenta os
 > benefícios, oferece downgrade e, se o cliente insistir, transfere para a
@@ -78,14 +95,24 @@ EXCEÇÃO: {o que NÃO muda / ressalva — só se houver}
 > C_OD_RETENC_MASSIF_CARTAO_MOT (Chat do App); o atendimento por Voz segue
 > sem alterações.
 
-**Depois (template estruturado)**:
+**Primeira versão do template (estruturado, mas ainda vocabulário corporativo
+— rótulos `AÇÃO`/`ENCAMINHAR`/`EXCEÇÃO` abandonados)**:
 ```
 Novo fluxo de retenção de massificados no Digital (produto SPPR), vigente desde 12/05/2026.
 AÇÃO: robô argumenta benefícios, oferece downgrade e, se o cliente insistir, transfere para a Tech4Humans (última tentativa ou cancelamento).
 ENCAMINHAR: transbordo comercial via habilidades W_OD_RETENC_MASSIF_CARTAO_MOT (WhatsApp) ou C_OD_RETENC_MASSIF_CARTAO_MOT (Chat do App).
 EXCEÇÃO: atendimento por Voz segue sem alterações.
 ```
-Mesma informação, ~380 caracteres, mas escaneável em segundos sob pressão.
+
+**Versão atual (template + linguagem simples, procedural)**:
+```
+Desde 12/05/2026, o cancelamento do SPPR no Digital mudou.
+FAÇA: primeiro o robô fala dos benefícios. Se o cliente não aceitar, o robô oferece trocar por um produto mais barato. Se ainda assim o cliente quiser cancelar, transfere pra Tech4Humans, que tenta reter de novo ou cancela.
+ENCAMINHE PARA: se o cliente pedir cancelamento com você no horário comercial, mande pra W_OD_RETENC_MASSIF_CARTAO_MOT (WhatsApp) ou C_OD_RETENC_MASSIF_CARTAO_MOT (Chat do App).
+NÃO FAÇA: não mude nada no atendimento por telefone (Voz) — continua igual.
+```
+Mesma informação, mesma estrutura escaneável, mas sem exigir que o operador
+"traduza" vocabulário corporativo antes de agir.
 
 ### Consumidor próprio: `knowledgeEnhanced` (LWC)
 

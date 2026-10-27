@@ -160,7 +160,7 @@ o loop até concluir ou bloquear com um motivo nomeado.
 - `references/html-parsing-rules.md` — por que parser por profundidade de
   tags, derivação de título, limitações conhecidas.
 - `references/content-authoring-rules.md` — template estruturado de Summary
-  (linha de fato principal + linhas com rótulo como AÇÃO/ENCAMINHAR/EXCEÇÃO)
+  (linha de fato principal + linhas com rótulo como FAÇA/NÃO FAÇA/ENCAMINHE PARA)
   e Question__c (pergunta natural, não keywords) — e por que é
   o agente quem escreve, nunca um script.
 - `references/known-import-errors.md` — tabela de erros reais do Import
